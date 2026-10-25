@@ -102,10 +102,10 @@ export default function HealthStory() {
           <div className="no-print flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Badge tone={report.source === 'live' ? 'sage' : 'neutral'}>
-                {report.source === 'live' ? 'Powered by Live AI' : 'Simulated AI (demo)'}
+                {report.source === 'live' ? 'Powered by Groq' : 'Simulated AI (demo)'}
               </Badge>
               {report.liveError && (
-                <span className="text-xs text-ink-faint">The live AI request failed — showing a simulated story.</span>
+                <span className="text-xs text-ink-faint">The live Groq request failed — showing a simulated story instead. Your selected entries are unaffected.</span>
               )}
             </div>
             <Button variant="outline" onClick={() => window.print()}>

@@ -1,13 +1,13 @@
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
-import { handleDescribe, handleHealthStory } from './server/oxion.js'
+import { handleDescribe, handleHealthStory } from './server/groq.js'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   // Loaded with an empty prefix so non-VITE_ prefixed server secrets are
   // readable here in Node, WITHOUT Vite ever injecting them into the
-  // client bundle (only vite.config.js and server/oxion.js ever see them).
+  // client bundle (only vite.config.js and server/groq.js ever see them).
   const env = loadEnv(mode, process.cwd(), '')
 
   const aiConfig = {

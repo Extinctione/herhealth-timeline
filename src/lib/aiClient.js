@@ -1,6 +1,12 @@
 // Thin client for the server-side AI routes (see vite.config.js +
-// server/oxion.js). The browser never talks to the AI provider directly
-// — only to our own same-origin /api/* endpoints.
+// server/groq.js). The browser never talks to Groq directly — only to
+// our own same-origin /api/* endpoints.
+//
+// NOTE: for women's health data specifically, these two calls are the
+// ONLY place in the app that sends any entry content off-device. Every
+// other feature (logging, timeline, search, filters, Health Story
+// display, printing) is pure localStorage — nothing else in this app
+// talks to the network at all.
 
 async function postJSON(url, payload) {
   const res = await fetch(url, {

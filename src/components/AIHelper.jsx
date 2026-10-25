@@ -158,13 +158,13 @@ export default function AIHelper({ onUseSuggestions, onSkip }) {
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium text-ink">Suggestions</p>
             <Badge tone={result.source === 'live' ? 'sage' : 'neutral'}>
-              {result.source === 'live' ? 'Powered by Live AI' : 'Simulated AI (demo)'}
+              {result.source === 'live' ? 'Powered by Groq' : 'Simulated AI (demo)'}
             </Badge>
           </div>
 
           {result.liveError && (
             <p className="text-xs text-ink-faint">
-              The live AI request failed, so these are simulated suggestions instead.
+              The live Groq request failed, so these are simulated suggestions instead — your description below is unchanged and safe to edit or save.
             </p>
           )}
 

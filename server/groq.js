@@ -1,18 +1,22 @@
 /**
- * server/oxion.js
+ * server/groq.js
  * -----------------------------------------------------------------------
  * Server-side only AI integration. This file runs inside the Vite Node
  * process (wired up as dev middleware in vite.config.js) and is NEVER
  * imported by any browser/client code, so the API key never reaches the
  * browser.
  *
- * Talks to any OpenAI-compatible Chat Completions API (model, messages
- * in -> choices[0].message.content out), configured via AI_API_KEY /
- * AI_API_URL / AI_MODEL in .env.local. Currently wired to Groq
- * (https://api.groq.com/openai/v1), which hosts OpenAI's open-weight
- * "openai/gpt-oss-20b" model — confirmed live on Groq's production
- * models list as of Oct 2026. (GitHub Models' inference API was fully
- * retired on 2026-07-30 and can no longer be used as a provider.)
+ * Talks to Groq's OpenAI-compatible Chat Completions API (model,
+ * messages in -> choices[0].message.content out), configured entirely
+ * via AI_API_KEY / AI_API_URL / AI_MODEL in .env.local — nothing below
+ * is hardcoded, so the model (or even the provider, as long as it's
+ * OpenAI-compatible) can be swapped by editing .env.local alone.
+ * Default configuration points at Groq (https://api.groq.com/openai/v1),
+ * which hosts OpenAI's open-weight "openai/gpt-oss-20b" model —
+ * confirmed present on Groq's own production models list as of Oct 2026
+ * (console.groq.com/docs/models). This project previously targeted
+ * GitHub Models, whose inference API was fully retired on 2026-07-30
+ * and can no longer be used as a provider at all.
  *
  * Endpoint:  POST {AI_API_URL}/chat/completions
  * Auth:      Authorization: Bearer <AI_API_KEY>
@@ -306,9 +310,15 @@ export async function handleHealthStory(payload, config) {
 
   if (isConfigured(config)) {
     try {
+      // Data minimization: the model only needs to write prose from these
+      // fields, so the internal `id` (irrelevant to the task) is stripped
+      // before anything leaves this server. `entrySummaries` with `id`
+      // intact is still what's returned to the frontend below, for
+      // per-entry list rendering.
+      const entriesForModel = entrySummaries.map(({ id, ...rest }) => rest);
       const result = await callChatCompletionAPI(config, {
         task: 'health-story',
-        input: { dateRange, entrySummaries },
+        input: { dateRange, entrySummaries: entriesForModel },
       });
       return {
         dateRange,
