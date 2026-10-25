@@ -1,0 +1,100 @@
+@import "tailwindcss";
+
+@theme {
+  --color-cream: #fbf7f1;
+  --color-cream-dark: #f2ebe0;
+  --color-ink: #2c2430;
+  --color-ink-soft: #6e6475;
+  --color-ink-faint: #a79fae;
+  --color-blush: #f5dde1;
+  --color-blush-dark: #e7b9c2;
+  --color-blush-deep: #c97a8c;
+  --color-lavender: #e7e1f6;
+  --color-lavender-dark: #c9bbe8;
+  --color-lavender-deep: #8d79c4;
+  --color-sage: #dde8df;
+  --color-sage-dark: #a9c6ae;
+
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-serif: 'Fraunces', Georgia, serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::selection {
+  background: var(--color-lavender-dark);
+  color: var(--color-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-lavender-deep);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-blush-dark);
+  border-radius: 999px;
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation: fade-in-up 0.25s ease-out both;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Print styles for the Health Story report                               */
+/* ---------------------------------------------------------------------- */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #print-report,
+  #print-report * {
+    visibility: visible;
+  }
+  #print-report {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    margin: 0;
+    padding: 24px;
+    background: #fff !important;
+    color: #1a1a1a !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
