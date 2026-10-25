@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Sparkles, Loader2, X, ArrowRight } from 'lucide-react'
 import { Field, TextInput, TextArea, Select, Button, Badge } from './ui.jsx'
+import VoiceInputButton from './VoiceInputButton.jsx'
 import { BODY_AREAS, DURATION_OPTIONS } from '../lib/tags.js'
 import { requestDescribeHelp } from '../lib/aiClient.js'
 import { todayISO } from '../lib/format.js'
@@ -84,6 +85,7 @@ export default function AIHelper({ onUseSuggestions, onSkip }) {
           placeholder="e.g. my stomach has been hurting on and off since yesterday and I feel really tired"
           rows={3}
         />
+        <VoiceInputButton className="mt-2" onAppend={(text) => setRawText((prev) => (prev ? `${prev} ${text}` : text))} />
       </Field>
 
       <button

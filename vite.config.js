@@ -1,7 +1,7 @@
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
-import { handleDescribe, handleHealthStory } from './server/groq.js'
+import { handleDescribe, handleHealthStory, handleHeraChat } from './server/groq.js'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
@@ -40,6 +40,8 @@ export default defineConfig(({ mode }) => {
                 result = await handleDescribe(payload, aiConfig)
               } else if (req.url === '/api/health-story') {
                 result = await handleHealthStory(payload, aiConfig)
+              } else if (req.url === '/api/hera-chat') {
+                result = await handleHeraChat(payload, aiConfig)
               } else {
                 res.statusCode = 404
                 res.end(JSON.stringify({ error: 'Not found' }))

@@ -1,10 +1,19 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { PlusCircle, FileText, Sparkles, RotateCcw, Activity, CalendarDays, Tag } from 'lucide-react'
-import { Card, Button, Badge } from '../components/ui.jsx'
+import { Card, Button } from '../components/ui.jsx'
 import EntryCard from '../components/EntryCard.jsx'
 import EntryDetailModal from '../components/EntryDetailModal.jsx'
-import { getEntries, saveEntry, deleteEntry, loadDemoData, clearDemoData, isDemoLoaded } from '../lib/storage.js'
+import {
+  getEntries,
+  saveEntry,
+  deleteEntry,
+  loadDemoData,
+  clearDemoData,
+  isDemoLoaded,
+  hasAnyEntries,
+  isFirstLaunch,
+} from '../lib/storage.js'
 import { DEMO_ENTRIES } from '../lib/demoData.js'
 
 export default function Dashboard() {
@@ -18,6 +27,15 @@ export default function Dashboard() {
   }
 
   useEffect(() => {
+    // On the very first time the app is ever opened in this browser (no
+    // entries logged yet), seed it with the existing demo data source so
+    // the dashboard isn't empty on a fresh launch. This only ever fires
+    // once: isFirstLaunch() marks itself seen immediately, so a later
+    // "Clear demo data" click (which also empties the entry list) will
+    // not cause demo data to silently come back.
+    if (isFirstLaunch() && !hasAnyEntries()) {
+      loadDemoData(DEMO_ENTRIES)
+    }
     refresh()
   }, [])
 

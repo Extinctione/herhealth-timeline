@@ -1,8 +1,11 @@
 // localStorage-backed data layer for HerHealth Timeline.
 // Simple, dependency-free CRUD for the demo.
 
+import { todayISO } from './format.js'
+
 const STORAGE_KEY = 'herhealth_entries_v1'
 const DEMO_FLAG_KEY = 'herhealth_demo_loaded_v1'
+const FIRST_LAUNCH_KEY = 'herhealth_first_launch_seen_v1'
 
 function readRaw() {
   try {
@@ -44,7 +47,7 @@ export function saveEntry(entry) {
 
   const newEntry = {
     id: makeId(),
-    date: entry.date || now.slice(0, 10),
+    date: entry.date || todayISO(),
     description: entry.description || '',
     tags: entry.tags || [],
     bodyArea: entry.bodyArea || '',
@@ -97,4 +100,19 @@ export function clearDemoData() {
 
 export function isDemoLoaded() {
   return window.localStorage.getItem(DEMO_FLAG_KEY) === 'true'
+}
+
+/**
+ * True exactly once per browser, the very first time the app is opened
+ * (nothing logged yet, demo data never loaded or cleared before). Marks
+ * itself seen immediately, so it only ever returns true once per browser —
+ * a later "Clear demo data" click intentionally will not cause this to
+ * fire again, even though it also leaves the entry list empty.
+ */
+export function isFirstLaunch() {
+  const seen = window.localStorage.getItem(FIRST_LAUNCH_KEY) === 'true'
+  if (!seen) {
+    window.localStorage.setItem(FIRST_LAUNCH_KEY, 'true')
+  }
+  return !seen
 }

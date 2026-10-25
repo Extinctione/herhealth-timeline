@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { X, Plus } from 'lucide-react'
 import { Field, TextInput, TextArea, Select, Button } from './ui.jsx'
+import VoiceInputButton from './VoiceInputButton.jsx'
 import { SUGGESTED_TAGS, BODY_AREAS, DURATION_OPTIONS } from '../lib/tags.js'
 import { todayISO } from '../lib/format.js'
 
@@ -78,6 +79,10 @@ export default function ExperienceForm({ initial, onSave, onCancel, saveLabel = 
           placeholder="e.g. Sharp cramping low in my abdomen that came and went through the afternoon..."
           rows={4}
           required
+        />
+        <VoiceInputButton
+          className="mt-2"
+          onAppend={(text) => setDescription((prev) => (prev ? `${prev} ${text}` : text))}
         />
       </Field>
 

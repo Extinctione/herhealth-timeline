@@ -1,12 +1,16 @@
 import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { Heart, Home, PlusCircle, Clock, FileText, Menu, X } from 'lucide-react'
+import { Heart, Home, PlusCircle, Clock, Droplet, FileText, MessageCircle, Users, Stethoscope, Menu, X } from 'lucide-react'
 
 const NAV_ITEMS = [
   { to: '/', label: 'Dashboard', icon: Home, end: true },
   { to: '/log', label: 'Log an Experience', icon: PlusCircle },
   { to: '/timeline', label: 'Timeline', icon: Clock },
+  { to: '/her-cycle', label: 'HerCycle', icon: Droplet },
   { to: '/health-story', label: 'Health Story', icon: FileText },
+  { to: '/hera', label: 'Hera', icon: MessageCircle },
+  { to: '/circle', label: 'HerCircle', icon: Users },
+  { to: '/care-connect', label: 'Care Connect', icon: Stethoscope },
 ]
 
 function NavLinks({ onNavigate }) {

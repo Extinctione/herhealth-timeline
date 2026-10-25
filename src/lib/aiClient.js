@@ -2,11 +2,12 @@
 // server/groq.js). The browser never talks to Groq directly — only to
 // our own same-origin /api/* endpoints.
 //
-// NOTE: for women's health data specifically, these two calls are the
-// ONLY place in the app that sends any entry content off-device. Every
-// other feature (logging, timeline, search, filters, Health Story
-// display, printing) is pure localStorage — nothing else in this app
-// talks to the network at all.
+// NOTE: for women's health data specifically, these calls (describe,
+// health-story, hera-chat) are the ONLY places in the app that send any
+// user-typed content off-device, and only what the user typed into that
+// feature. Timeline storage, HerCircle posts/comments, and everything
+// else stay in localStorage — nothing else in this app talks to the
+// network at all.
 
 async function postJSON(url, payload) {
   const res = await fetch(url, {
@@ -26,4 +27,8 @@ export async function requestDescribeHelp(input) {
 
 export async function requestHealthStory(entries) {
   return postJSON('/api/health-story', { entries })
+}
+
+export async function requestHeraChat(messages) {
+  return postJSON('/api/hera-chat', { messages })
 }

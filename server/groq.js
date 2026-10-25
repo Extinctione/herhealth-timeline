@@ -59,11 +59,31 @@ const AI_SYSTEM_PROMPTS = {
     '{"narrative": string (first-person, plain-language, chronological summary), ' +
     '"discussionQuestions": string[] (max 5 questions the user could bring to a doctor based on patterns you see)}. ' +
     'Never state or imply a diagnosis, cause, or treatment.',
+  'hera-chat':
+    'You are Hera, a warm, plain-language women\'s health education assistant inside a personal health app. ' +
+    'You are NOT a doctor. You must never diagnose a condition, name a likely cause, or recommend a specific ' +
+    'treatment, medication, or dosage. Given a JSON object with "messages" (the conversation so far), respond ' +
+    'with ONLY a JSON object (no prose, no markdown fences) of this exact shape: {"reply": string}. Keep replies ' +
+    'short, supportive, and educational (general information on menstrual cycles, menopause, pregnancy basics, ' +
+    'and wellness). If the user describes a symptom, gently suggest logging it in their Timeline and discussing ' +
+    'it with a healthcare professional. If the user describes a possible emergency (e.g. severe bleeding, chest ' +
+    'pain, thoughts of self-harm), clearly tell them to seek emergency care or call emergency services right away.',
 };
 
 function buildMessages(task, input) {
   const system = AI_SYSTEM_PROMPTS[task];
   if (!system) throw new Error(`Unknown AI task: ${task}`);
+  if (task === 'hera-chat') {
+    // Real multi-turn chat: pass prior turns through as-is (capped) instead
+    // of JSON-stringifying them into a single user message, so the model
+    // gets proper conversational context.
+    const history = Array.isArray(input.messages) ? input.messages : [];
+    const turns = history
+      .filter((m) => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
+      .slice(-12)
+      .map((m) => ({ role: m.role, content: m.content }));
+    return [{ role: 'system', content: system }, ...turns];
+  }
   return [
     { role: 'system', content: system },
     { role: 'user', content: JSON.stringify(input) },
@@ -343,4 +363,73 @@ export async function handleHealthStory(payload, config) {
     }
   }
   return simulateHealthStory(payload);
+}
+
+// ---------------------------------------------------------------------------
+// Hera chat
+// ---------------------------------------------------------------------------
+
+const HERA_DISCLAIMER =
+  'Hera shares general educational information only. It does not diagnose conditions, prescribe treatment, or replace a healthcare professional.';
+
+const EMERGENCY_KEYWORDS = [
+  'chest pain', "can't breathe", 'cant breathe', 'severe bleeding', 'suicide', 'self-harm', 'self harm',
+  'passed out', 'unconscious', 'can’t breathe',
+];
+
+const HERA_TOPIC_REPLIES = [
+  {
+    keywords: ['period', 'cycle', 'menstru'],
+    reply:
+      'Menstrual cycles typically run about 21–35 days, counted from the first day of one period to the first day of the next. Changes in flow, timing, or symptoms are worth tracking — logging them in your Timeline makes it easy to share real patterns with a clinician.',
+  },
+  {
+    keywords: ['menopause', 'perimenopause', 'hot flash'],
+    reply:
+      'Perimenopause can bring irregular periods, hot flashes, sleep changes, and mood shifts, often years before periods stop completely. Everyone\'s experience looks different, so logging what you notice can help a doctor see your specific pattern.',
+  },
+  {
+    keywords: ['pregnan', 'fertility', 'ovulat'],
+    reply:
+      'Fertility and pregnancy questions are very individual. I can share general information, but for anything about your own fertility, conception, or pregnancy symptoms, a clinician or OB-GYN is the right person to guide you.',
+  },
+  {
+    keywords: ['pain', 'cramp', 'ache'],
+    reply:
+      'Pain patterns (where, how intense, how long, what helps) are some of the most useful things to document. Logging this in your Timeline with as much detail as feels manageable turns it into real evidence for a doctor visit.',
+  },
+  {
+    keywords: ['pcos', 'endometriosis', 'fibroid'],
+    reply:
+      'I can share general background on conditions like that, but only a clinician can evaluate your specific symptoms and history. Bringing a few months of logged Timeline entries to that conversation can help.',
+  },
+];
+
+function simulateHeraReply(messages) {
+  const last = [...messages].reverse().find((m) => m.role === 'user');
+  const text = (last?.content || '').toLowerCase();
+
+  if (EMERGENCY_KEYWORDS.some((k) => text.includes(k))) {
+    return "That sounds serious — please contact emergency services or go to an emergency room right away rather than waiting on a chat response. I'm not able to assess emergencies.";
+  }
+
+  const match = HERA_TOPIC_REPLIES.find((t) => t.keywords.some((k) => text.includes(k)));
+  if (match) return match.reply;
+
+  return "Thanks for sharing that. I can offer general women's health education, but I can't diagnose or give medical advice. If this is something you're noticing regularly, it might help to log it in your Timeline so you can track patterns and bring them to a healthcare professional.";
+}
+
+export async function handleHeraChat(payload, config) {
+  const messages = Array.isArray(payload.messages) ? payload.messages : [];
+
+  if (isConfigured(config)) {
+    try {
+      const result = await callChatCompletionAPI(config, { task: 'hera-chat', input: { messages } });
+      return { reply: result.reply || '', disclaimer: HERA_DISCLAIMER, source: 'live' };
+    } catch (err) {
+      console.warn('[ai] hera-chat live call failed, falling back to simulation:', err.message);
+      return { reply: simulateHeraReply(messages), disclaimer: HERA_DISCLAIMER, source: 'simulated', liveError: err.message };
+    }
+  }
+  return { reply: simulateHeraReply(messages), disclaimer: HERA_DISCLAIMER, source: 'simulated' };
 }
